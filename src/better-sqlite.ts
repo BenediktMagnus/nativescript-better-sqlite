@@ -180,6 +180,24 @@ export class Database
     }
 
     /**
+     * The last row ID that has been inserted into a table.
+     */
+    public lastRowId (): number
+    {
+        const sql = 'SELECT last_insert_rowid();';
+
+        const cursor = this.sqliteDatabase.rawQuery(sql, []);
+
+        cursor.moveToFirst();
+
+        const lastInsertedRowId = cursor.getInt(0);
+
+        cursor.close();
+
+        return lastInsertedRowId;
+    }
+
+    /**
      * Close the database connection.
      * TODO: What happens if you try to do something after closing?
      */

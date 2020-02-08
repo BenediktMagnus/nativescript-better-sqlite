@@ -17,3 +17,7 @@ tmp/
 # NPM
 node_modules/
 package-lock.json
+
+# Compiled files:
+bin/
+lib/

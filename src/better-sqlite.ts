@@ -6,6 +6,97 @@ import * as app from "tns-core-modules/application";
 // Alias the long name:
 const AndroidSqlite = android.database.sqlite.SQLiteDatabase;
 type AndroidSqliteDatabase = android.database.sqlite.SQLiteDatabase;
+type AndroidSqliteStatement = android.database.sqlite.SQLiteStatement;
+
+class Statement
+{
+    private sqliteDatabase: AndroidSqliteDatabase;
+    private sqliteStatement: AndroidSqliteStatement;
+
+    public readonly database: Database;
+    public readonly sql: string;
+
+    public constructor (parent: Database, sqliteDatabase: AndroidSqliteDatabase, sql: string)
+    {
+        this.database = parent;
+        this.sqliteDatabase = sqliteDatabase;
+        this.sql = sql;
+
+        this.sqliteStatement = sqliteDatabase.compileStatement(sql);
+    }
+
+    /**
+     * Run a statement with binding parameters that does not return any values.
+     * @param bindParameters The parameters to bind.
+     * @returns The number of rows affected.
+     */
+    public run (bindParameters: any = []): number
+    {
+        this.bind(bindParameters);
+
+        const numberOfChanges = this.sqliteStatement.executeUpdateDelete();
+
+        return numberOfChanges;
+    }
+
+    public get (bindParameters?: any): any // The Row
+    {
+        return bindParameters;
+    }
+
+    public all (bindParameters?: any): any // An array of rows
+    {
+        return bindParameters;
+    }
+
+    public iterate (bindParameters?: any): any // An iterator for the rows
+    {
+        return bindParameters;
+    }
+
+    private bind (bindParameters: any): void
+    {
+        this.sqliteStatement.clearBindings();
+
+        let counter = 1;
+
+        for (const value of bindParameters)
+        {
+            if ((value === null) || (value === undefined))
+            {
+                this.sqliteStatement.bindNull(counter);
+            }
+            else if (typeof value === 'number')
+            {
+                if (Number.isInteger(value))
+                {
+                    this.sqliteStatement.bindLong(counter, value);
+                }
+                else
+                {
+                    this.sqliteStatement.bindDouble(counter, value);
+                }
+            }
+            else if (typeof value === 'boolean')
+            {
+                const valueAsNumber = value ? 1 : 0;
+
+                this.sqliteStatement.bindLong(counter, valueAsNumber);
+            }
+            else if (typeof value === 'string')
+            {
+                this.sqliteStatement.bindString(counter, value);
+            }
+            else
+            {
+                // TODO: Is this correct?
+                this.sqliteStatement.bindBlob(counter, value);
+            }
+
+            counter++;
+        }
+    }
+}
 
 export interface Options
 {
@@ -74,6 +165,18 @@ export class Database
     public execute (sql: string): void
     {
         this.sqliteDatabase.execSQL(sql);
+    }
+
+    /**
+     * Create a new prepared statement from the given SQL string.
+     * @param sql The SQL string to prepare.
+     * @returns The prepared statement.
+     */
+    public prepare (sql: string): Statement
+    {
+        const statement = new Statement(this, this.sqliteDatabase, sql);
+
+        return statement;
     }
 
     /**

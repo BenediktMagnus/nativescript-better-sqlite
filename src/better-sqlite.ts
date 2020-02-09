@@ -28,10 +28,10 @@ class Statement
 
     /**
      * Run a statement with binding parameters that does not return any values.
-     * @param bindParameters The parameters to bind.
+     * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string.
      * @returns The number of rows affected.
      */
-    public run (bindParameters: any = []): number
+    public run (bindParameters: any[] = []): number
     {
         this.bind(bindParameters);
 
@@ -40,22 +40,22 @@ class Statement
         return numberOfChanges;
     }
 
-    public get (bindParameters?: any): any // The Row
+    public get (bindParameters: any[] = []): any // The row
     {
         return bindParameters;
     }
 
-    public all (bindParameters?: any): any // An array of rows
+    public all (bindParameters: any[]): any // An array of rows
     {
         return bindParameters;
     }
 
-    public iterate (bindParameters?: any): any // An iterator for the rows
+    public iterate (bindParameters: any[]): any // An iterator for the rows
     {
         return bindParameters;
     }
 
-    private bind (bindParameters: any): void
+    private bind (bindParameters: any[]): void
     {
         this.cachedSqliteStatement.clearBindings();
 

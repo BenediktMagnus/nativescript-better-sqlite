@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
-        "target": "es5",
+        "module": "CommonJS",
+        "target": "ES2018",
 
         "outDir": "lib",
 
@@ -24,8 +24,7 @@
         "removeComments": true,
 
         "lib": [
-            "es6",
-            "dom"
+            "ES2018"
         ],
     },
     "include": [

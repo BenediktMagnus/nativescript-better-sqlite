@@ -23,7 +23,7 @@ class Statement
         this.sqliteDatabase = sqliteDatabase;
         this.sql = sql;
 
-        this.cachedSqliteStatement = sqliteDatabase.compileStatement(sql);
+        this.cachedSqliteStatement = null;
     }
 
     /**
@@ -33,9 +33,9 @@ class Statement
      */
     public run (bindParameters: any[] = []): number
     {
-        this.bind(bindParameters);
+        const sqliteStatement = this.getBindedStatement(bindParameters);
 
-        const numberOfChanges = this.sqliteStatement.executeUpdateDelete();
+        const numberOfChanges = sqliteStatement.executeUpdateDelete();
 
         return numberOfChanges;
     }
@@ -55,8 +55,18 @@ class Statement
         return bindParameters;
     }
 
-    private bind (bindParameters: any[]): void
+    /**
+     * Bind parameters to the statement. It will be compiled if needed.
+     * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string given to the statement.
+     * @returns The statement with binded parameters.
+     */
+    private getBindedStatement (bindParameters: any[]): SqliteStatementType
     {
+        if (this.cachedSqliteStatement === null)
+        {
+            this.cachedSqliteStatement = this.sqliteDatabase.compileStatement(this.sql);
+        }
+
         this.cachedSqliteStatement.clearBindings();
 
         let counter = 1;
@@ -67,35 +77,39 @@ class Statement
             {
                 this.cachedSqliteStatement.bindNull(counter);
             }
-            else if (typeof value === 'number')
-            {
-                if (Number.isInteger(value))
-                {
-                    this.cachedSqliteStatement.bindLong(counter, value);
-                }
-                else
-                {
-                    this.cachedSqliteStatement.bindDouble(counter, value);
-                }
-            }
-            else if (typeof value === 'boolean')
-            {
-                const valueAsNumber = value ? 1 : 0;
-
-                this.cachedSqliteStatement.bindLong(counter, valueAsNumber);
-            }
-            else if (typeof value === 'string')
-            {
-                this.cachedSqliteStatement.bindString(counter, value);
-            }
             else
             {
-                // TODO: Is this correct?
-                this.cachedSqliteStatement.bindBlob(counter, value);
+                switch (typeof value)
+                {
+                    case 'number':
+                        if (Number.isInteger(value))
+                        {
+                            this.cachedSqliteStatement.bindLong(counter, value);
+                        }
+                        else
+                        {
+                            this.cachedSqliteStatement.bindDouble(counter, value);
+                        }
+                        break;
+                    case 'boolean':
+                    {
+                        const valueAsNumber = value ? 1 : 0;
+                        this.cachedSqliteStatement.bindLong(counter, valueAsNumber);
+                        break;
+                    }
+                    case 'string':
+                        this.cachedSqliteStatement.bindString(counter, value);
+                        break;
+                    default:
+                        // TODO: Is this correct?
+                        this.cachedSqliteStatement.bindBlob(counter, value);
+                }
             }
 
             counter++;
         }
+
+        return this.cachedSqliteStatement;
     }
 }
 

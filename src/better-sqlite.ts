@@ -11,7 +11,8 @@ type SqliteStatementType = android.database.sqlite.SQLiteStatement;
 class Statement
 {
     private sqliteDatabase: SqliteDatabaseType;
-    private sqliteStatement: SqliteStatementType;
+
+    private cachedSqliteStatement: SqliteStatementType|null;
 
     public readonly database: Database;
     public readonly sql: string;
@@ -22,7 +23,7 @@ class Statement
         this.sqliteDatabase = sqliteDatabase;
         this.sql = sql;
 
-        this.sqliteStatement = sqliteDatabase.compileStatement(sql);
+        this.cachedSqliteStatement = sqliteDatabase.compileStatement(sql);
     }
 
     /**
@@ -56,7 +57,7 @@ class Statement
 
     private bind (bindParameters: any): void
     {
-        this.sqliteStatement.clearBindings();
+        this.cachedSqliteStatement.clearBindings();
 
         let counter = 1;
 
@@ -64,33 +65,33 @@ class Statement
         {
             if ((value === null) || (value === undefined))
             {
-                this.sqliteStatement.bindNull(counter);
+                this.cachedSqliteStatement.bindNull(counter);
             }
             else if (typeof value === 'number')
             {
                 if (Number.isInteger(value))
                 {
-                    this.sqliteStatement.bindLong(counter, value);
+                    this.cachedSqliteStatement.bindLong(counter, value);
                 }
                 else
                 {
-                    this.sqliteStatement.bindDouble(counter, value);
+                    this.cachedSqliteStatement.bindDouble(counter, value);
                 }
             }
             else if (typeof value === 'boolean')
             {
                 const valueAsNumber = value ? 1 : 0;
 
-                this.sqliteStatement.bindLong(counter, valueAsNumber);
+                this.cachedSqliteStatement.bindLong(counter, valueAsNumber);
             }
             else if (typeof value === 'string')
             {
-                this.sqliteStatement.bindString(counter, value);
+                this.cachedSqliteStatement.bindString(counter, value);
             }
             else
             {
                 // TODO: Is this correct?
-                this.sqliteStatement.bindBlob(counter, value);
+                this.cachedSqliteStatement.bindBlob(counter, value);
             }
 
             counter++;

@@ -283,6 +283,17 @@ class Statement
     }
 
     /**
+     * Close the statement. \
+     * This must be called after use.
+     */
+    public close (): void
+    {
+        this.cachedSqliteStatement?.close();
+
+        this.cachedSqliteStatement = null;
+    }
+
+    /**
      * Bind parameters to the statement. It will be compiled if needed.
      * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string given to the statement.
      * @returns The statement with binded parameters.

@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference, spaced-comment
-/// <reference path="../node_modules/tns-platform-declarations/android-24.d.ts" />
+/// <reference path="../node_modules/tns-platform-declarations/android.d.ts" />
 
 import * as app from "tns-core-modules/application";
 

@@ -439,13 +439,11 @@ export class Database
     {
         const sql = 'SELECT last_insert_rowid();';
 
-        const cursor = this.sqliteDatabase.rawQuery(sql, []);
+        const statement = this.prepare(sql);
 
-        cursor.moveToFirst();
+        const lastInsertedRowId = statement.getSingleNumber();
 
-        const lastInsertedRowId = cursor.getInt(0);
-
-        cursor.close();
+        statement.close();
 
         return lastInsertedRowId;
     }

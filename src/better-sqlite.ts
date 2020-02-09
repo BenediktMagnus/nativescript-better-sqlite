@@ -182,7 +182,7 @@ export class Database
     /**
      * The last row ID that has been inserted into a table.
      */
-    public lastRowId (): number
+    public lastInsertRowId (): number
     {
         const sql = 'SELECT last_insert_rowid();';
 

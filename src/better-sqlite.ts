@@ -213,6 +213,34 @@ class Statement
     }
 
     /**
+     * Get a single number value.
+     * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string.
+     * @returns The single number value.
+     */
+    public getSingleNumber (bindParameters: any[] = []): number
+    {
+        const sqliteStatement = this.getBindedStatement(bindParameters);
+
+        const singleNumber = sqliteStatement.simpleQueryForLong();
+
+        return singleNumber;
+    }
+
+    /**
+     * Get a single string value.
+     * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string.
+     * @returns The single string value.
+     */
+    public getSingleString (bindParameters: any[] = []): string
+    {
+        const sqliteStatement = this.getBindedStatement(bindParameters);
+
+        const singleString = sqliteStatement.simpleQueryForString();
+
+        return singleString;
+    }
+
+    /**
      * Get the first row.
      * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string.
      * @returns The row.

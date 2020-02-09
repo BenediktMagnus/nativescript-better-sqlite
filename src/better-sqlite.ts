@@ -7,6 +7,178 @@ import * as app from "tns-core-modules/application";
 const SqliteDatabase = android.database.sqlite.SQLiteDatabase;
 type SqliteDatabaseType = android.database.sqlite.SQLiteDatabase;
 type SqliteStatementType = android.database.sqlite.SQLiteStatement;
+const SqliteCursor = android.database.Cursor;
+type SqliteCursorType = android.database.Cursor;
+
+/**
+ * A row is an object with the row names as keys for the values.
+ */
+type Row = object;
+
+/**
+ * An iterator for rows.
+ */
+class RowIterator implements Iterator<Row>, Iterable<Row>
+{
+    private readonly initialCursorPosition = -1;
+
+    private cursor: SqliteCursorType;
+
+    private closed: boolean;
+
+    /**
+     * If true the cursor is automatically closed after the iterator has been completed or getFirst/getLast has been called. \
+     * Attention: If you set this to false you must call the close method manually!
+     */
+    public autoClose: boolean;
+
+    public constructor (cursor: SqliteCursorType)
+    {
+        this.cursor = cursor;
+
+        this.autoClose = true;
+        this.closed = false;
+    }
+
+    public [Symbol.iterator] (): RowIterator
+    {
+        return this;
+    }
+
+    /**
+     * Get the next iterator result.
+     * The cursor will be closed when the last result is returned.
+     */
+    public next (): IteratorResult<Row>
+    {
+        if (this.closed)
+        {
+            return {
+                done: true,
+                value: null,
+            };
+        }
+        else if (this.cursor.moveToNext())
+        {
+            const row = this.getCurrentRow();
+
+            return {
+                done: false,
+                value: row,
+            };
+        }
+        else
+        {
+            if (this.autoClose)
+            {
+                this.closed = true;
+                this.cursor.close();
+            }
+            else
+            {
+                this.cursor.moveToPosition(this.initialCursorPosition);
+            }
+
+            return {
+                done: true,
+                value: null,
+            };
+        }
+    }
+
+    public getFirst (): Row
+    {
+        const previousPosition = this.cursor.getPosition();
+
+        this.cursor.moveToFirst();
+
+        const row = this.getCurrentRow();
+
+        this.cursor.moveToPosition(previousPosition);
+
+        if (this.autoClose)
+        {
+            this.closed = true;
+            this.cursor.close();
+        }
+
+        return row;
+    }
+
+    public getLast (): Row
+    {
+        const previousPosition = this.cursor.getPosition();
+
+        this.cursor.moveToLast();
+
+        const row = this.getCurrentRow();
+
+        this.cursor.moveToPosition(previousPosition);
+
+        if (this.autoClose)
+        {
+            this.closed = true;
+            this.cursor.close();
+        }
+
+        return row;
+    }
+
+    public reset (): void
+    {
+        this.cursor.moveToPosition(this.initialCursorPosition);
+    }
+
+    public close (): void
+    {
+        this.closed = true;
+        this.cursor.close();
+    }
+
+    /**
+     * Get the current row from the cursor.
+     * @returns The row.
+     */
+    private getCurrentRow (): Row
+    {
+        const row: any = {};
+
+        const columNames = this.cursor.getColumnNames();
+
+        for (let i = columNames.length; i-- > 0;)
+        {
+            const name = columNames[i];
+            const index = this.cursor.getColumnIndex(name);
+            const typeId = this.cursor.getType(index);
+
+            let value = null;
+            switch (typeId)
+            {
+                case SqliteCursor.FIELD_TYPE_INTEGER:
+                    value = this.cursor.getInt(index);
+                    break;
+                case SqliteCursor.FIELD_TYPE_FLOAT:
+                    value = this.cursor.getDouble(index);
+                    break;
+                case SqliteCursor.FIELD_TYPE_STRING:
+                    value = this.cursor.getString(index);
+                    break;
+                case SqliteCursor.FIELD_TYPE_BLOB:
+                    value = this.cursor.getBlob(index); // TODO: Is this really correct?
+                    break;
+                case SqliteCursor.FIELD_TYPE_NULL:
+                    // Do nothing, value is already null.
+                    break;
+                default:
+                    throw new TypeError('The given SQLite column type is not supported.');
+            }
+
+            row[name] = value;
+        }
+
+        return row;
+    }
+}
 
 class Statement
 {
@@ -40,19 +212,46 @@ class Statement
         return numberOfChanges;
     }
 
-    public get (bindParameters: any[] = []): any // The row
+    /**
+     * Get the first row.
+     * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string.
+     * @returns The row.
+     */
+    public get (bindParameters: any[] = []): Row
     {
-        return bindParameters;
+        const rowIterator = this.iterate(bindParameters);
+
+        const row = rowIterator.getFirst();
+
+        return row;
     }
 
-    public all (bindParameters: any[]): any // An array of rows
+    /**
+     * Get all rows as array.
+     * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string.
+     * @returns An array of rows.
+     */
+    public all (bindParameters: any[]): Row[]
     {
-        return bindParameters;
+        const rowIterator = this.iterate(bindParameters);
+
+        const rows: Row[] = Array.from(rowIterator);
+
+        return rows;
     }
 
-    public iterate (bindParameters: any[]): any // An iterator for the rows
+    /**
+     * Get an iterator for iterating over the rows.
+     * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string.
+     * @returns The row iterator.
+     */
+    public iterate (bindParameters: any[]): RowIterator
     {
-        return bindParameters;
+        const cursor = this.sqliteDatabase.rawQuery(this.sql, bindParameters);
+
+        const rowIterator = new RowIterator(cursor);
+
+        return rowIterator;
     }
 
     /**

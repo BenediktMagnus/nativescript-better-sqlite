@@ -4,19 +4,19 @@
 import * as app from "tns-core-modules/application";
 
 // Alias the long name:
-const AndroidSqlite = android.database.sqlite.SQLiteDatabase;
-type AndroidSqliteDatabase = android.database.sqlite.SQLiteDatabase;
-type AndroidSqliteStatement = android.database.sqlite.SQLiteStatement;
+const SqliteDatabase = android.database.sqlite.SQLiteDatabase;
+type SqliteDatabaseType = android.database.sqlite.SQLiteDatabase;
+type SqliteStatementType = android.database.sqlite.SQLiteStatement;
 
 class Statement
 {
-    private sqliteDatabase: AndroidSqliteDatabase;
-    private sqliteStatement: AndroidSqliteStatement;
+    private sqliteDatabase: SqliteDatabaseType;
+    private sqliteStatement: SqliteStatementType;
 
     public readonly database: Database;
     public readonly sql: string;
 
-    public constructor (parent: Database, sqliteDatabase: AndroidSqliteDatabase, sql: string)
+    public constructor (parent: Database, sqliteDatabase: SqliteDatabaseType, sql: string)
     {
         this.database = parent;
         this.sqliteDatabase = sqliteDatabase;
@@ -107,7 +107,7 @@ export interface Options
 
 export class Database
 {
-    private sqliteDatabase: AndroidSqliteDatabase;
+    private sqliteDatabase: SqliteDatabaseType;
 
     private _isOpen: boolean;
 
@@ -132,14 +132,14 @@ export class Database
 
         if (options.inMemory)
         {
-            this.sqliteDatabase = AndroidSqlite.create(null as any);
+            this.sqliteDatabase = SqliteDatabase.create(null as any);
         }
         else
         {
-            let openMode = options.readonly ? AndroidSqlite.OPEN_READONLY : AndroidSqlite.OPEN_READWRITE;
+            let openMode = options.readonly ? SqliteDatabase.OPEN_READONLY : SqliteDatabase.OPEN_READWRITE;
             if (options.createIfNotExist)
             {
-                openMode = openMode || AndroidSqlite.CREATE_IF_NECESSARY;
+                openMode = openMode || SqliteDatabase.CREATE_IF_NECESSARY;
             }
 
             const file = this.getAppContext().getDatabasePath(name);
@@ -152,7 +152,7 @@ export class Database
                 file.getParentFile().setWritable(true);
             }
 
-            this.sqliteDatabase = AndroidSqlite.openDatabase(file.getAbsolutePath(), null as any, openMode);
+            this.sqliteDatabase = SqliteDatabase.openDatabase(file.getAbsolutePath(), null as any, openMode);
         }
 
         this._isOpen = true;

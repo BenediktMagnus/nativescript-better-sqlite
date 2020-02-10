@@ -1,5 +1,15 @@
 # Nativescript-Better-Sqlite
 
+A Nativescript plugin providing easy SQLite access on Android.
+
+
+## Installation:
+
+```
+tns plugin add nativescript-better-sqlite
+```
+
+
 ## What is working:
 - Create/connect database
 - In memory databases

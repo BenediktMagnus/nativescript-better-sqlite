@@ -183,17 +183,24 @@ class RowIterator implements Iterator<Row>, Iterable<Row>
 class Statement
 {
     private sqliteDatabase: SqliteDatabaseType;
-
     private cachedSqliteStatement: SqliteStatementType|null;
+    private autoClose: boolean;
 
     public readonly database: Database;
     public readonly sql: string;
 
-    public constructor (parent: Database, sqliteDatabase: SqliteDatabaseType, sql: string)
+    /**
+     * @param parent The database class that created this statement.
+     * @param sqliteDatabase The SQLite database we are working on.
+     * @param sql The SQL string.
+     * @param autoClose If true, the statement will automatically closed after a result is returned.
+     */
+    public constructor (parent: Database, sqliteDatabase: SqliteDatabaseType, sql: string, autoClose: boolean)
     {
         this.database = parent;
         this.sqliteDatabase = sqliteDatabase;
         this.sql = sql;
+        this.autoClose = autoClose;
 
         this.cachedSqliteStatement = null;
     }
@@ -209,6 +216,11 @@ class Statement
 
         const numberOfChanges = sqliteStatement.executeUpdateDelete();
 
+        if (this.autoClose)
+        {
+            this.close();
+        }
+
         return numberOfChanges;
     }
 
@@ -223,6 +235,11 @@ class Statement
 
         const singleNumber = sqliteStatement.simpleQueryForLong();
 
+        if (this.autoClose)
+        {
+            this.close();
+        }
+
         return singleNumber;
     }
 
@@ -236,6 +253,11 @@ class Statement
         const sqliteStatement = this.getBindedStatement(bindParameters);
 
         const singleString = sqliteStatement.simpleQueryForString();
+
+        if (this.autoClose)
+        {
+            this.close();
+        }
 
         return singleString;
     }
@@ -259,7 +281,7 @@ class Statement
      * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string.
      * @returns An array of rows.
      */
-    public all (bindParameters: any[]): Row[]
+    public all (bindParameters: any[] = []): Row[]
     {
         const rowIterator = this.iterate(bindParameters);
 
@@ -273,7 +295,7 @@ class Statement
      * @param bindParameters An array of parameters to bind. The order is the same as in the SQL string.
      * @returns The row iterator.
      */
-    public iterate (bindParameters: any[]): RowIterator
+    public iterate (bindParameters: any[] = []): RowIterator
     {
         const cursor = this.sqliteDatabase.rawQuery(this.sql, bindParameters);
 
@@ -429,11 +451,9 @@ export class Database
     {
         const pragmaSql = 'PRAGMA ' + sql;
 
-        const statement = this.prepare(pragmaSql);
+        const statement = this.prepare(pragmaSql, true);
 
         const result = statement.all();
-
-        statement.close();
 
         return result;
     }
@@ -441,11 +461,12 @@ export class Database
     /**
      * Create a new prepared statement from the given SQL string.
      * @param sql The SQL string to prepare.
+     * @param autoClose If true, the statement will automatically closed after a result is returned.
      * @returns The prepared statement.
      */
-    public prepare (sql: string): Statement
+    public prepare (sql: string, autoClose = false): Statement
     {
-        const statement = new Statement(this, this.sqliteDatabase, sql);
+        const statement = new Statement(this, this.sqliteDatabase, sql, autoClose);
 
         return statement;
     }
@@ -457,11 +478,9 @@ export class Database
     {
         const sql = 'SELECT last_insert_rowid();';
 
-        const statement = this.prepare(sql);
+        const statement = this.prepare(sql, true);
 
         const lastInsertedRowId = statement.getSingleNumber();
-
-        statement.close();
 
         return lastInsertedRowId;
     }

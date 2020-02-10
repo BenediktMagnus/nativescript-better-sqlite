@@ -14,6 +14,6 @@
 
 ## TODOs:
 - Transactions
+- Workers / async
 - Results as array
 - Optimisations
-- Workers / async

@@ -421,6 +421,24 @@ export class Database
     }
 
     /**
+     * Set a pragma statement and return the result.
+     * @param sql The pragma SQL string.
+     * @returns The pragma result. Empty if there is none.
+     */
+    public pragma (sql: string): Row[]
+    {
+        const pragmaSql = 'PRAGMA ' + sql;
+
+        const statement = this.prepare(pragmaSql);
+
+        const result = statement.all();
+
+        statement.close();
+
+        return result;
+    }
+
+    /**
      * Create a new prepared statement from the given SQL string.
      * @param sql The SQL string to prepare.
      * @returns The prepared statement.

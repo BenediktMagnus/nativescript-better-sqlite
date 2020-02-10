@@ -10,6 +10,7 @@
 - Get single values
 - Iterator for rows
 - Get last inserted row
+- Pragmas
 
 ## TODOs:
 - Transactions

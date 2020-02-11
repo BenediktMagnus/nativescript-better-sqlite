@@ -435,10 +435,6 @@ export class Database
      * Whether the database is readonly.
      */
     public readonly isReadonly: boolean;
-    /**
-     * Whether the database has been newly created or an existing file opened.
-     */
-    public readonly isNew: boolean;
 
     /**
      * Wether the database is currently opened or closed.
@@ -446,6 +442,20 @@ export class Database
     public get isOpen (): boolean
     {
         return this._isOpen;
+    }
+
+    /**
+     * The version of the database. \
+     * This can be set and get by the user to determine whether an upgrade of the database schema is necessary.
+     */
+    public get version (): number
+    {
+        return this.sqliteDatabase.getVersion();
+    }
+
+    public set version (version: number)
+    {
+        this.sqliteDatabase.setVersion(version);
     }
 
     constructor (name: string, options: Options = {})
@@ -461,8 +471,6 @@ export class Database
         if (options.inMemory)
         {
             this.sqliteDatabase = SqliteDatabase.create(null as any);
-
-            this.isNew = true;
         }
         else
         {
@@ -474,18 +482,12 @@ export class Database
 
             const file = this.getAppContext().getDatabasePath(name);
 
-            if(file.exists())
-            {
-                this.isNew = false;
-            }
-            else
+            if(!file.exists())
             {
                 // Make sure we can write to the file:
                 file.getParentFile().mkdirs();
                 file.getParentFile().setReadable(true);
                 file.getParentFile().setWritable(true);
-
-                this.isNew = true;
             }
 
             this.sqliteDatabase = SqliteDatabase.openDatabase(file.getAbsolutePath(), null as any, openMode);

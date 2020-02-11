@@ -497,7 +497,7 @@ export class Database
     }
 
     /**
-     * Directly execute the given SQL string. The SQL must not return anything.
+     * Directly execute the given SQL string. The SQL must only contain a single statement and not return anything.
      * @param sql The SQL string to execute.
      */
     public execute (sql: string): void

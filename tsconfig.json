@@ -15,10 +15,10 @@
         "skipLibCheck": true,
 
         "strict": true,
-		"noImplicitReturns": true,
-		"noImplicitAny": true,
-		"noImplicitThis": true,
-		"noUnusedLocals": true,
+        "noImplicitReturns": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
         "noUnusedParameters": true,
 
         "lib": [
@@ -26,8 +26,8 @@
         ],
     },
     "include": [
-		"src/**/*.ts"
-	],
+        "src/**/*.ts"
+    ],
     "exclude": [
         "node_modules"
     ]

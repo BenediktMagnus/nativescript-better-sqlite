@@ -86,6 +86,9 @@ class RowIterator implements Iterator<Row>, Iterable<Row>
         }
     }
 
+    /**
+     * Get the first row of the result set.
+     */
     public getFirst (): Row
     {
         const previousPosition = this.cursor.getPosition();
@@ -105,6 +108,9 @@ class RowIterator implements Iterator<Row>, Iterable<Row>
         return row;
     }
 
+    /**
+     * Get the last row of the result set.
+     */
     public getLast (): Row
     {
         const previousPosition = this.cursor.getPosition();
@@ -124,11 +130,18 @@ class RowIterator implements Iterator<Row>, Iterable<Row>
         return row;
     }
 
+    /**
+     * Reset the iteration cursor to the initial position.
+     */
     public reset (): void
     {
         this.cursor.moveToPosition(this.initialCursorPosition);
     }
 
+    /**
+     * Close the iterator. \
+     * Note that this should only be possible if autoClose has been set to false or the iteration has been incomplete.
+     */
     public close (): void
     {
         this.closed = true;
@@ -180,13 +193,22 @@ class RowIterator implements Iterator<Row>, Iterable<Row>
     }
 }
 
+/**
+ * A SQL statement that has been prepared.
+ */
 class Statement
 {
     private sqliteDatabase: SqliteDatabaseType;
     private cachedSqliteStatement: SqliteStatementType|null;
     private autoClose: boolean;
 
+    /**
+     * The database this statement is attached to.
+     */
     public readonly database: Database;
+    /**
+     * The original SQL string used to prepare this statement.
+     */
     public readonly sql: string;
 
     /**
@@ -373,27 +395,54 @@ class Statement
     }
 }
 
+/**
+ * Options for creating a database.
+ */
 export interface Options
 {
+    /**
+     * Whether the database shall only exist in memory and not on disk.
+     */
     inMemory?: boolean;
+    /**
+     * Whether the database shall be opened in readonly mode.
+     */
     readonly?: boolean;
+    /**
+     * If true the database will be created if it does not exist already, otherwise an exception is thrown.
+     */
     createIfNotExist?: boolean;
 }
 
+/**
+ * The SQL database class containing everything needed.
+ */
 export class Database
 {
     private sqliteDatabase: SqliteDatabaseType;
 
     private _isOpen: boolean;
 
+    /**
+     * The name used to create the database.
+     */
     public readonly name: string;
+    /**
+     * Whether the database is in memory.
+     */
     public readonly isInMemory: boolean;
+    /**
+     * Whether the database is readonly.
+     */
     public readonly isReadonly: boolean;
     /**
      * Whether the database has been newly created or an existing file opened.
      */
     public readonly isNew: boolean;
 
+    /**
+     * Wether the database is currently opened or closed.
+     */
     public get isOpen (): boolean
     {
         return this._isOpen;
@@ -499,10 +548,11 @@ export class Database
 
     /**
      * Close the database connection.
-     * TODO: What happens if you try to do something after closing?
      */
     public close (): void
     {
+        // TODO: What happens if you try to do something after closing?
+
         this._isOpen = false;
 
         this.sqliteDatabase.close();

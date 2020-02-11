@@ -389,6 +389,10 @@ export class Database
     public readonly name: string;
     public readonly isInMemory: boolean;
     public readonly isReadonly: boolean;
+    /**
+     * Whether the database has been newly created or an existing file opened.
+     */
+    public readonly isNew: boolean;
 
     public get isOpen (): boolean
     {
@@ -408,6 +412,8 @@ export class Database
         if (options.inMemory)
         {
             this.sqliteDatabase = SqliteDatabase.create(null as any);
+
+            this.isNew = true;
         }
         else
         {
@@ -419,12 +425,18 @@ export class Database
 
             const file = this.getAppContext().getDatabasePath(name);
 
-            // Make sure we can write to the file:
-            if(!file.exists())
+            if(file.exists())
             {
+                this.isNew = false;
+            }
+            else
+            {
+                // Make sure we can write to the file:
                 file.getParentFile().mkdirs();
                 file.getParentFile().setReadable(true);
                 file.getParentFile().setWritable(true);
+
+                this.isNew = true;
             }
 
             this.sqliteDatabase = SqliteDatabase.openDatabase(file.getAbsolutePath(), null as any, openMode);

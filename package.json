@@ -34,7 +34,8 @@
 	},
     "dependencies": {},
     "scripts": {
-        "prepare": "rm -r lib && node_modules/typescript/bin/tsc"
+        "compile": "node_modules/typescript/bin/tsc",
+        "prepare": "rm -r lib && npm run compile"
     },
     "files": [
         "package.json",

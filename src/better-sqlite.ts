@@ -13,7 +13,7 @@ type SqliteCursorType = android.database.Cursor;
 /**
  * A row is an object with the row names as keys for the values.
  */
-type Row = object;
+type Row = any;
 
 /**
  * An iterator for rows.

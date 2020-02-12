@@ -8,6 +8,9 @@
     "nativescript": {
         "platforms": {
             "android": "6.0.0"
+        },
+        "plugin": {
+            "category": "Database"
         }
     },
     "keywords": [
@@ -16,6 +19,7 @@
         "SQLite",
         "Android"
     ],
+    "typings": "lib/better-sqlite.d.ts",
     "repository": {
         "type": "git",
         "url": "https://github.com/BenediktMagnus/nativescript-better-sqlite.git"

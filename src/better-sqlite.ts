@@ -319,7 +319,9 @@ class Statement
      */
     public iterate (bindParameters: any[] = []): RowIterator
     {
-        const cursor = this.sqliteDatabase.rawQuery(this.sql, bindParameters);
+        const bindParametersAsStringArray = this.convertBindParametersToStringArray(bindParameters);
+
+        const cursor = this.sqliteDatabase.rawQuery(this.sql, bindParametersAsStringArray);
 
         const rowIterator = new RowIterator(cursor);
 
@@ -392,6 +394,20 @@ class Statement
         }
 
         return this.cachedSqliteStatement;
+    }
+
+    private convertBindParametersToStringArray (bindParameters: any[]): string[]
+    {
+        const result: string[] = [];
+
+        for (const parameter of bindParameters)
+        {
+            const parameterAsString = `${parameter}`;
+
+            result.push(parameterAsString);
+        }
+
+        return result;
     }
 }
 

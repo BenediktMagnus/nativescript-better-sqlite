@@ -50,7 +50,7 @@ const names = database.prepare('SELECT * FROM user', true).all();
 console.log(names);
 ```
 
-results in
+results in this output:
 
 ```json
 [
@@ -64,8 +64,6 @@ results in
     }
 ]
 ```
-
-this output.
 
 
 ## TODOs:

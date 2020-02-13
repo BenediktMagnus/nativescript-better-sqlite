@@ -4,6 +4,7 @@
     "description": "NativeScript plugin for using SQLite easily on Android",
     "author": "Benedikt Magnus",
     "license": "MIT",
+    "readme": "README.md",
     "main": "lib/better-sqlite",
     "nativescript": {
         "platforms": {
